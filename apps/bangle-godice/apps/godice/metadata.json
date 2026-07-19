@@ -1,0 +1,25 @@
+{
+  "id": "godice",
+  "name": "GoDice",
+  "shortName": "GoDice",
+  "version": "0.1.0",
+  "description": "Connect, identify and monitor up to six GoDice; shows rolls, history, grouped rolls, battery and session statistics.",
+  "icon": "godice.png",
+  "type": "app",
+  "tags": "game,bluetooth",
+  "supports": ["BANGLEJS2"],
+  "allow_emulator": false,
+  "author": "Codex port based on Particula sample API",
+  "readme": "README.md",
+  "storage": [
+    {"name":"godice.app.js","url":"godice.app.js"},
+    {"name":"godice.protocol.js","url":"godice.protocol.js"},
+    {"name":"godice.manager.js","url":"godice.manager.js"},
+    {"name":"godice.settings.js","url":"settings.js"},
+    {"name":"godice.img","url":"godice-icon.js","evaluate":true}
+  ],
+  "data": [
+    {"name":"godice.json"},
+    {"name":"godice.history"}
+  ]
+}
