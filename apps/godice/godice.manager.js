@@ -9,14 +9,14 @@ function Manager(settings, changed) {
   this.dice=[]; this.queue=[]; this.connecting=false; this.scanning=false;
   this.scanTimer=undefined; this.stopped=false;
 }
-Manager.prototype.find=function(id) {
+Manager.find=function(id) {
   for(var i=0;i<this.dice.length;i++) if(this.dice[i].id===id) return this.dice[i];
 };
-Manager.prototype.slotType=function(id) {
+Manager.slotType=function(id) {
   var map=this.settings.types||{};
   return map[id]===undefined?P.TYPES.D6:map[id];
 };
-Manager.prototype.scan=function() {
+Manager.scan=function() {
   var self=this;
   if(this.scanning||this.connecting||this.stopped) return;
   this.scanning=true; this.changed({kind:"status",message:"Scanning..."});
@@ -40,11 +40,11 @@ Manager.prototype.scan=function() {
     if (!self.queue.length && self.dice.length<6) self.scheduleScan(5000);
   },{timeout:self.settings.scanSeconds*1000,filters:[{namePrefix:"GoDice_"}]});
 };
-Manager.prototype.scheduleScan=function(ms) {
+Manager.scheduleScan=function(ms) {
   var self=this; if(this.scanTimer||this.stopped) return;
   this.scanTimer=setTimeout(function(){self.scanTimer=undefined;self.scan();},ms);
 };
-Manager.prototype.connectNext=function() {
+Manager.connectNext=function() {
   var self=this, die;
   if(this.connecting||this.stopped) return;
   if(this.dice.filter(function(d){return d.connected;}).length>=(this.settings.maxConnections||2)) return;
@@ -74,31 +74,31 @@ Manager.prototype.connectNext=function() {
     self.connectNext();
   });
 };
-Manager.prototype.disconnected=function(die) {
+Manager.disconnected=function(die) {
   if(!die.connected&&!die.connecting) return;
   die.connected=false; die.connecting=false; die.gatt=die.service=die.tx=die.rx=undefined;
   this.changed({kind:"disconnected",die:die});
   if(!this.stopped) { this.queue.push(die); this.scheduleScan(3000); this.connectNext(); }
 };
-Manager.prototype.notification=function(die,data) {
+Manager.notification=function(die,data) {
   var event=P.decode(data,die.type); die.lastSeen=Date.now(); event.die=die;
   if(event.kind==="battery") die.battery=event.level;
   else if(event.kind==="color") die.color=event.color;
   else if(event.kind==="stable") die.lastRoll=event.value;
   this.changed(event);
 };
-Manager.prototype.write=function(die,data) {
+Manager.write=function(die,data) {
   if(!die||!die.connected||!die.tx) return Promise.reject("Die is offline");
   return die.tx.writeValue(data).catch(function(){});
 };
-Manager.prototype.identify=function(die) { return this.write(die,P.pulse(3,15,10,[0,80,255])); };
-Manager.prototype.refresh=function(die) { this.write(die,P.batteryRequest()); this.write(die,P.colorRequest()); };
-Manager.prototype.setType=function(die,type) {
+Manager.identify=function(die) { return this.write(die,P.pulse(3,15,10,[0,80,255])); };
+Manager.refresh=function(die) { this.write(die,P.batteryRequest()); this.write(die,P.colorRequest()); };
+Manager.setType=function(die,type) {
   die.type=type; this.settings.types=this.settings.types||{}; this.settings.types[die.id]=type;
   require("Storage").writeJSON("godice.json",this.settings);
   this.changed({kind:"type",die:die});
 };
-Manager.prototype.stop=function() {
+Manager.stop=function() {
   this.stopped=true; if(this.scanTimer) clearTimeout(this.scanTimer);
   this.dice.forEach(function(d){if(d.gatt)try{d.gatt.disconnect();}catch(e){}});
 };
